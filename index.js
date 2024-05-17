@@ -89,7 +89,7 @@ class Slider {
 
     draw(index = undefined) {
         if (index == undefined) { index = this.position; }
-        if (!this.isInRange(index)) { index = limit; }
+        if (!this.isInRange(index)) { return this.position; }
         this.drawFunction(this.cvs, index);
         return index;
     }
