@@ -173,7 +173,8 @@ class RangeSelector {
     pointToIndex(x) { return Math.floor((x - RangeSelector.getOffset(this.cvs)) / this.unitWidth); }
 
     updateLabel(event) {
-        let idx = this.pointToIndex(event.x);
+        const idx = this.pointToIndex(event.x);
+        if (!this.items[idx]) { return; }
         this.label.innerText = this.items[idx].title;
         const maxWidth = 50;
         this.label.style.position = 'absolute';
