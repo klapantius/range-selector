@@ -1,11 +1,3 @@
-const canvas = document.getElementById('canvas');
-canvas.width = window.innerWidth;
-canvas.height = 63;
-const ctx = canvas.getContext('2d');
-const tooltip = document.getElementById('tooltip');
-
-const markerHeight = 18;
-
 class Scale {
     cvs = undefined;
     height = 5;
@@ -60,15 +52,19 @@ class Slider {
     cvs = undefined;
     unitWidth = 0;
     position = 0;
-    constructor(canvas, unitWidth, initialPosition = 0, drawFunction = (x) => { }) {
+    drawFunction = () => { };
+    isInRange = (_) => true;
+
+    constructor(canvas, unitWidth, initialPosition = 0, drawFunction = (x) => { }, limitFunction = () => 5) {
         this.cvs = canvas;
         this.unitWidth = unitWidth;
         this.position = initialPosition;
         this.drawFunction = drawFunction;
+        this.isInRange = limitFunction;
     }
-    draw(index = undefined, limit = 9) {                           // todo: limit evaluation function
+    draw(index = undefined) {
         if (index == undefined) { index = this.position; }
-        if (index > limit) { index = limit; }
+        if (!this.isInRange(index)) { index = limit; }
         this.drawFunction(this.cvs, index);
         return index;
     }
@@ -76,11 +72,9 @@ class Slider {
         console.log(`hello ${index}`)
         let ctx = cvs.getContext('2d');
         var x = index * this.unitWidth;
-        // ctx.fillStyle = 'red';
-        // ctx.fillRect(x, 1, 10, cvs.height-2)
         ctx.beginPath();
         ctx.moveTo(x, 1);
-        ctx.lineTo(x, cvs.height-5);
+        ctx.lineTo(x, cvs.height - 5);
         ctx.lineWidth = 5;
         ctx.lineCap = "round";
         ctx.strokeStyle = "red"
@@ -113,7 +107,14 @@ class RangeSelector {
         let idx = 0;
         this.unitWidth = this.cvs.width / (this.items.length - 1);
         this.markers = this.items.map(i => new Marker(canvas, this.unitWidth, this.scale.height, idx++, i.type));
-        this.lowerLimit = new Slider(this.cvs, this.unitWidth, 1, Slider.lowerLimitDrawFunction);
+        this.lowerLimit = new Slider(
+            this.cvs, this.unitWidth, 0,
+            Slider.lowerLimitDrawFunction,
+            (x) => x <= (this.upperLimit.position ?? items.length / 2));
+        this.upperLimit = new Slider(
+            this.cvs, this.unitWidth, items.length - 1,
+            Slider.lowerLimitDrawFunction,
+            (x) => x >= (this.lowerLimit.position ?? items.length / 2))
 
         this.cvs.addEventListener('mousemove', this.onMouseMove.bind(this));
     }
@@ -129,6 +130,7 @@ class RangeSelector {
             'middle'
         ).draw('lightgrey');
         this.lowerLimit.draw();
+        this.upperLimit.draw();
     }
 
     pointToIndex(x) { return Math.floor(x / this.unitWidth); }
@@ -146,15 +148,13 @@ class RangeSelector {
         this.scale.draw('green');
         this.markers.map(m => m.draw());
         this.lowerLimit.draw();
-
-        // drawMark(new Marker(idx));
-        // lowerLimit.draw(position, 99);
+        this.upperLimit.draw();
     }
 }
 
 let rangeSelector = new RangeSelector(
     [...Array(9).keys()].map(i => new DataPoint(`24050${i}`, i % 3 == 0 ? 'upper' : 'lower')),
-    document.getElementById('c2'),
+    document.getElementById('canvas'),
     document.getElementById('itemName')
 );
 rangeSelector.draw();
