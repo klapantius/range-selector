@@ -54,22 +54,49 @@ class Slider {
     position = 0;
     drawFunction = () => { };
     isInRange = (_) => true;
+    isMoving = false;
+    baseX = 0;
 
     constructor(canvas, unitWidth, initialPosition = 0, drawFunction = (x) => { }, limitFunction = () => 5) {
         this.cvs = canvas;
+        const rect = this.cvs.getBoundingClientRect();
+        this.baseX = rect.left;
+        console.log(`hello: ${this.baseX}`)
         this.unitWidth = unitWidth;
         this.position = initialPosition;
         this.drawFunction = drawFunction;
         this.isInRange = limitFunction;
+
+        this.cvs.addEventListener('mousedown', this.onMouseDown.bind(this));
+        this.cvs.addEventListener('mousemove', this.onMouseMove.bind(this));
+        this.cvs.addEventListener('mouseup', this.onMouseUp.bind(this));
     }
+
+    onMouseDown(event) {
+        const myX = this.position * this.unitWidth + this.baseX;
+        if (!(myX - 5 <= event.x && event.x <= myX + 5)) { return; }
+        this.isMoving = true;
+    }
+
+    onMouseMove(event) {
+        if (!this.isMoving) { return; }
+        const idx = Math.floor(event.x / this.unitWidth);
+        this.position = this.draw(idx);
+    }
+
+    onMouseUp(event) {
+        if (!this.isMoving) { return; }
+        this.isMoving = false;
+    }
+
     draw(index = undefined) {
         if (index == undefined) { index = this.position; }
         if (!this.isInRange(index)) { index = limit; }
         this.drawFunction(this.cvs, index);
         return index;
     }
+
     static lowerLimitDrawFunction(cvs, index) {
-        console.log(`hello ${index}`)
         let ctx = cvs.getContext('2d');
         var x = index * this.unitWidth;
         ctx.beginPath();
@@ -140,11 +167,13 @@ class RangeSelector {
         this.label.innerText = this.items[idx].title;
         const maxWidth = 50;
         this.label.style.position = 'absolute';
-        this.label.style.left = (event.x < window.innerWidth - maxWidth) ? event.x + 'px' : window.innerWidth - maxWidth;
-        this.label.style.top = event.y + 'px';
+        this.label.style.left = (event.x < window.innerWidth - maxWidth) ? (event.x + 5) + 'px' : window.innerWidth - maxWidth;
+        this.label.style.top = (event.y + 2) + 'px';
     }
 
     draw() {
+        const ctx = this.cvs.getContext('2d');
+        ctx.clearRect(0, 0, this.cvs.width, this.cvs.height);
         this.scale.draw('green');
         this.markers.map(m => m.draw());
         this.lowerLimit.draw();
