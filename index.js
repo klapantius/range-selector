@@ -55,13 +55,11 @@ class Slider {
     drawFunction = () => { };
     isInRange = (_) => true;
     isMoving = false;
-    baseX = 0;
+    xOffset = 0;
 
     constructor(canvas, unitWidth, initialPosition = 0, drawFunction = (x) => { }, limitFunction = () => 5) {
         this.cvs = canvas;
-        const rect = this.cvs.getBoundingClientRect();
-        this.baseX = rect.left;
-        console.log(`hello: ${this.baseX}`)
+        this.xOffset = RangeSelector.getOffset(this.cvs);
         this.unitWidth = unitWidth;
         this.position = initialPosition;
         this.drawFunction = drawFunction;
@@ -73,7 +71,7 @@ class Slider {
     }
 
     onMouseDown(event) {
-        const myX = this.position * this.unitWidth + this.baseX;
+        const myX = this.position * this.unitWidth + this.xOffset;
         if (!(myX - 5 <= event.x && event.x <= myX + 5)) { return; }
         this.isMoving = true;
     }
@@ -97,8 +95,20 @@ class Slider {
     }
 
     static lowerLimitDrawFunction(cvs, index) {
-        let ctx = cvs.getContext('2d');
-        var x = index * this.unitWidth;
+        const ctx = cvs.getContext('2d');
+        const x = index * this.unitWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, 1);
+        ctx.lineTo(x, cvs.height - 5);
+        ctx.lineWidth = 5;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "red"
+        ctx.stroke();
+    }
+
+    static upperLimitDrawFunction(cvs, index) {
+        const x = index * this.unitWidth;
+        const ctx = cvs.getContext('2d');
         ctx.beginPath();
         ctx.moveTo(x, 1);
         ctx.lineTo(x, cvs.height - 5);
@@ -160,7 +170,7 @@ class RangeSelector {
         this.upperLimit.draw();
     }
 
-    pointToIndex(x) { return Math.floor(x / this.unitWidth); }
+    pointToIndex(x) { return Math.floor((x - RangeSelector.getOffset(this.cvs)) / this.unitWidth); }
 
     updateLabel(event) {
         let idx = this.pointToIndex(event.x);
@@ -178,6 +188,11 @@ class RangeSelector {
         this.markers.map(m => m.draw());
         this.lowerLimit.draw();
         this.upperLimit.draw();
+    }
+
+    static getOffset(element) {
+        const rect = element.getBoundingClientRect();
+        return rect.left;
     }
 }
 
