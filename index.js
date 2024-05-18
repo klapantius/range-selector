@@ -56,10 +56,12 @@ class Slider {
     isInRange = (_) => true;
     isMoving = false;
     myX = 0;
+    myGrabbingRadius = 0;
 
     constructor(canvas, unitWidth, initialPosition = 0, drawFunction = (x) => { }, limitFunction = () => 5) {
         this.cvs = canvas;
         this.unitWidth = unitWidth;
+        this.myGrabbingRadius = this.unitWidth / 3;
         this.position = initialPosition;
         this.drawFunction = drawFunction;
         this.isInRange = limitFunction;
@@ -70,7 +72,7 @@ class Slider {
     }
 
     onMouseDown(event) {
-        if (!(this.myX - 5 <= event.x && event.x <= this.myX + 5)) { return; }
+        if (!(this.myX - this.myGrabbingRadius <= event.x && event.x <= this.myX + this.myGrabbingRadius)) { return; }
         this.isMoving = true;
     }
 
@@ -83,7 +85,6 @@ class Slider {
     onMouseUp(event) {
         if (!this.isMoving) { return; }
         this.isMoving = false;
-        console.log(`slider dropped at position ${this.position}`);
     }
 
     draw(index = undefined) {
@@ -95,13 +96,13 @@ class Slider {
 
     static lowerLimitDrawFunction(cvs, index) {
         const x = index * this.unitWidth;
-        this.drawSlider(x);
+        Slider.drawSlider(cvs, x);
         return x;
     }
 
     static upperLimitDrawFunction(cvs, index) {
         const x = (index + 1) * this.unitWidth;
-        this.drawSlider(x);
+        Slider.drawSlider(cvs, x);
         return x;
     }
     
@@ -132,6 +133,7 @@ class RangeSelector {
     scale = undefined;
     unitWidth = 0;
     lowerLimit = undefined;
+    upperLimit = undefined;
 
     constructor(items, canvas, tooltip) {
         this.items = items;
