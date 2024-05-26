@@ -51,20 +51,22 @@ class Marker {
 class Slider {
     cvs = undefined;
     unitWidth = 0;
-    position = 0;
+    position = 0; // index (0..n) where the slider points to
     drawFunction = () => { };
     isInRange = (_) => true;
+    changedCallback = () => undefined;
     isMoving = false;
     myX = 0;
     myGrabbingRadius = 0;
 
-    constructor(canvas, unitWidth, initialPosition = 0, drawFunction = (x) => { }, limitFunction = () => 5) {
+    constructor(canvas, unitWidth, initialPosition = 0, drawFunction = (x) => { }, limitFunction = () => 5, changedCallback = () => undefined) {
         this.cvs = canvas;
         this.unitWidth = unitWidth;
         this.myGrabbingRadius = this.unitWidth / 3;
         this.position = initialPosition;
         this.drawFunction = drawFunction;
         this.isInRange = limitFunction;
+        this.changedCallback = changedCallback;
 
         this.cvs.addEventListener('mousedown', this.onMouseDown.bind(this));
         this.cvs.addEventListener('mousemove', this.onMouseMove.bind(this));
@@ -79,7 +81,11 @@ class Slider {
     onMouseMove(event) {
         if (!this.isMoving) { return; }
         const idx = Math.floor((event.x - RangeSelector.getOffset(this.cvs)) / this.unitWidth);
-        this.position = this.draw(idx);
+        const updatedPosition = this.draw(idx);
+        if (updatedPosition !== this.position) {
+            this.position = updatedPosition;
+            this.changedCallback(this.position);
+        }
     }
 
     onMouseUp(event) {
@@ -105,7 +111,7 @@ class Slider {
         Slider.drawSlider(cvs, x);
         return x;
     }
-    
+
     static drawSlider(cvs, x) {
         const ctx = cvs.getContext('2d');
         ctx.beginPath();
@@ -147,11 +153,13 @@ class RangeSelector {
         this.lowerLimit = new Slider(
             this.cvs, this.unitWidth, 0,
             Slider.lowerLimitDrawFunction,
-            (x) => x <= (this.upperLimit.position ?? items.length / 2));
+            (x) => x <= (this.upperLimit.position ?? items.length / 2),
+            this.onSliderChanged);
         this.upperLimit = new Slider(
             this.cvs, this.unitWidth, items.length - 1,
             Slider.upperLimitDrawFunction,
-            (x) => x >= (this.lowerLimit.position ?? items.length / 2));
+            (x) => x >= (this.lowerLimit.position ?? items.length / 2),
+            this.onSliderChanged);
 
         this.cvs.addEventListener('mousemove', this.onMouseMove.bind(this));
     }
@@ -168,6 +176,10 @@ class RangeSelector {
         ).draw('lightgrey');
         this.lowerLimit.draw();
         this.upperLimit.draw();
+    }
+
+    onSliderChanged = () => {
+        console.log(`lower: ${this.lowerLimit.position}; upper: ${this.upperLimit.position}`);
     }
 
     pointToIndex(x) { return Math.floor((x - RangeSelector.getOffset(this.cvs)) / this.unitWidth); }
