@@ -75,7 +75,6 @@ class Slider {
 
     onMouseDown(event) {
         const eventX = event.x - RangeSelector.getOffset(this.cvs);
-        console.log(`${this.myX} - ${event.x} - ${eventX}`);
         if (!(this.myX - this.myGrabbingRadius <= event.x && event.x <= this.myX + this.myGrabbingRadius)) { return; }
         this.isMoving = true;
     }
@@ -158,7 +157,6 @@ class RangeSelector {
         this.scale = new Scale(canvas, canvas.height / 4);
         let idx = 0;
         this.unitWidth = this.cvs.offsetWidth / (this.items.length);
-        console.log(`unit width: ${this.unitWidth}`)
         this.markers = this.items.map(i => new Marker(canvas, this.unitWidth, this.scale.height, idx++, i.type));
         this.lowerLimit = new Slider(
             this.cvs, this.unitWidth, 0,
