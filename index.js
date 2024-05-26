@@ -139,9 +139,10 @@ class RangeSelector {
     scale = undefined;
     unitWidth = 0;
     lowerLimit = undefined;
-    upperLimit = undefined;
+    upperLimit = undefined
+    onChangeCallback = () => undefined;
 
-    constructor(items, canvas, tooltip) {
+    constructor(items, canvas, tooltip, onChangeCallback = (lowerLimit, upperLimit) => undefined) {
         this.items = items;
         this.cvs = canvas;
         this.label = tooltip;
@@ -179,7 +180,9 @@ class RangeSelector {
     }
 
     onSliderChanged = () => {
-        console.log(`lower: ${this.lowerLimit.position}; upper: ${this.upperLimit.position}`);
+        this.onChangeCallback(
+            this.lowerLimit.position,
+            this.upperLimit.position);
     }
 
     pointToIndex(x) { return Math.floor((x - RangeSelector.getOffset(this.cvs)) / this.unitWidth); }
