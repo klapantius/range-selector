@@ -1,14 +1,18 @@
+const items = [...Array(9).keys()].map(i => new DataPoint(`24050${i}`, i % 3 == 0 ? 'upper' : 'lower'))
+
 const calculator = new Calculator(document.getElementById('calculator'));
 
 const rangeSelector = new RangeSelector(
-    [...Array(9).keys()].map(i => new DataPoint(`24050${i}`, i % 3 == 0 ? 'upper' : 'lower')),
+    items,
     document.getElementById('rangeSelector').getElementsByTagName('canvas')[0],
     document.getElementById('rangeSelector').getElementsByTagName('span')[0],
-    updateCalculatorOnRangeChange
+    updateCalculator
 );
 rangeSelector.draw();
-calculator.update(rangeSelector.lowerLimit.position, rangeSelector.upperLimit.position);
+calculator.update(getTitle(rangeSelector.lowerLimit.position), getTitle(rangeSelector.upperLimit.position));
 
-function updateCalculatorOnRangeChange(lowerLimit, upperLimit) {
-    calculator.update(lowerLimit, upperLimit);
+function updateCalculator(lowerLimit, upperLimit) {
+    calculator.update(getTitle(lowerLimit), getTitle(upperLimit));
 }
+
+function getTitle(index) { return items[index].title; }
