@@ -1,6 +1,6 @@
 class KeyValuePairElement {
     title = 'my title';
-    value = 'n/a';
+    valueElement = undefined;
     htmlElement = undefined;
     
     constructor(title) {
@@ -8,13 +8,17 @@ class KeyValuePairElement {
         const labelContent = document.createTextNode(`${title}: `);
         label.appendChild(labelContent);
 
-        const value = document.createElement('span');
+        this.valueElement = document.createElement('span');
         const valueContent = document.createTextNode('n/a');
-        value.appendChild(valueContent);
+        this.valueElement.appendChild(valueContent);
         
         this.htmlElement = document.createElement('span');
         this.htmlElement.appendChild(label);
-        this.htmlElement.appendChild(value);
+        this.htmlElement.appendChild(this.valueElement);
+    }
+
+    update = (newValue) => {
+        this.valueElement.innerText = newValue;
     }
 }
 
@@ -34,7 +38,9 @@ class Calculator {
         this.endDate = new KeyValuePairElement('End date');
         this.myDiv.appendChild(this.endDate.htmlElement);
     }
-    
-}
 
-const calculator = new Calculator(document.getElementById('calculator'));
+    update = (newLowerLimit, newUpperLimit) => {
+        this.startDate.update(newLowerLimit);
+        this.endDate.update(newUpperLimit);
+    }
+}
