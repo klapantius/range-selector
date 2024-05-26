@@ -7,6 +7,7 @@ const rangeSelector = new RangeSelector(
     updateCalculatorOnRangeChange
 );
 rangeSelector.draw();
+calculator.update(rangeSelector.lowerLimit.position, rangeSelector.upperLimit.position);
 
 function updateCalculatorOnRangeChange(lowerLimit, upperLimit) {
     calculator.update(lowerLimit, upperLimit);
