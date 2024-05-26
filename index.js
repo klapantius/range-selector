@@ -1,6 +1,6 @@
 const items = [...Array(9).keys()].map(i => new DataPoint(`24050${i}`, i % 3 == 0 ? 'upper' : 'lower'))
 
-const calculator = new Calculator(document.getElementById('calculator'));
+const calculator = new Calculator(document.getElementById('calculator'), items);
 
 const rangeSelector = new RangeSelector(
     items,
@@ -9,10 +9,9 @@ const rangeSelector = new RangeSelector(
     updateCalculator
 );
 rangeSelector.draw();
-calculator.update(getTitle(rangeSelector.lowerLimit.position), getTitle(rangeSelector.upperLimit.position));
+calculator.update(rangeSelector.lowerLimit.position, rangeSelector.upperLimit.position);
 
 function updateCalculator(lowerLimit, upperLimit) {
-    calculator.update(getTitle(lowerLimit), getTitle(upperLimit));
+    calculator.update(lowerLimit, upperLimit);
 }
 
-function getTitle(index) { return items[index].title; }
